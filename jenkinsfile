@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("python-image:latest", "./app")
+                }
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                // Add commands to run tests if you have any
+                // For example:
+                sh 'echo "Running tests"'
+                // Run your test commands here
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_credentials') {
+                        docker.image("python-image:latest").push()
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Clean up Docker resources
+            cleanWs()
+        }
+    }
+}
